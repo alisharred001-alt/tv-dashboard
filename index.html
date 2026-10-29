@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TV Dashboard</title>
+    <!-- Fonts matching the stylized futuristic aesthetic -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #050508;
+            color: #ffffff;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        /* Video Background */
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.7) contrast(1.1);
+        }
+
+        /* Ambient Dark/Blue Glow Overlay */
+        .ambient-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            background: radial-gradient(circle at center, rgba(0, 162, 255, 0.05) 0%, rgba(5, 5, 8, 0.6) 100%);
+            pointer-events: none;
+        }
+
+        /* UI Layer */
+        .ui-layer {
+            position: relative;
+            z-index: 3;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 4rem;
+        }
+
+        /* Center Widget Group */
+        .center-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 0.15rem;
+        }
+
+        .welcome-tag {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.7);
+            background: rgba(15, 23, 42, 0.45);
+            padding: 0.3rem 1.2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            margin-bottom: 0.2rem;
+        }
+
+        .day-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.8rem;
+            font-weight: 900;
+            letter-spacing: 12px;
+            text-transform: uppercase;
+            color: #ffffff;
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.5), 0 8px 25px rgba(0, 0, 0, 0.9);
+            line-height: 1;
+            transform: scaleX(1.05);
+        }
+
+        .date-sub {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.9);
+        }
+
+        .clock-center {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: #38bdf8;
+            text-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
+            margin-top: 0.1rem;
+        }
+
+        /* Navigation Button */
+        .nav-container {
+            margin-top: 2.5rem;
+        }
+
+        .nav-btn {
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid rgba(56, 189, 248, 0.3);
+            padding: 0.8rem 2.2rem;
+            border-radius: 14px;
+            color: #ffffff;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            cursor: pointer;
+            backdrop-filter: blur(16px);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
+
+        .nav-btn:focus, .nav-btn.active {
+            background: rgba(14, 165, 233, 0.3);
+            border-color: #38bdf8;
+            transform: scale(1.08);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.6), inset 0 0 15px rgba(56, 189, 248, 0.3);
+        }
+
+        .nav-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: #38bdf8;
+        }
+
+        /* Apps Modal Overlay */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 8, 0.88);
+            backdrop-filter: blur(24px);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #38bdf8;
+            text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+        }
+
+        /* App Grid */
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            width: 75%;
+            max-width: 950px;
+        }
+
+        .app-card {
+            background: rgba(15, 23, 42, 0.75);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.8rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            outline: none;
+            text-decoration: none;
+            color: #ffffff;
+        }
+
+        .app-card:focus, .app-card.active {
+            background: rgba(14, 165, 233, 0.25);
+            border-color: #38bdf8;
+            transform: scale(1.08);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.5);
+        }
+
+        /* Rounded Icon Images */
+        .app-card img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 12px;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+        }
+
+        .app-name {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .close-hint {
+            margin-top: 2.5rem;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            color: #64748b;
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Video Background -->
+    <div class="video-container">
+        <video autoplay loop muted playsinline id="bgVideo">
+            <source src="Blue-Flames-Samurai-4K.mp4" type="video/mp4">
+        </video>
+    </div>
+
+    <!-- Ambient Overlay -->
+    <div class="ambient-overlay"></div>
+
+    <!-- UI Layer -->
+    <div class="ui-layer">
+        <div class="center-group">
+            <div class="welcome-tag">Welcome Back</div>
+            <div class="day-title" id="dayName">THURSDAY</div>
+            <div class="date-sub" id="fullDate">29 OCTOBER, 2026.</div>
+            <div class="clock-center" id="clock">- 15:02 -</div>
+        </div>
+
+        <div class="nav-container">
+            <button class="nav-btn active" id="appsBtn" tabindex="0">
+                <svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
+                APPS
+            </button>
+        </div>
+    </div>
+
+    <!-- Apps Modal Overlay -->
+    <div class="modal-overlay" id="appsModal">
+        <div class="modal-title">Applications</div>
+        <div class="app-grid">
+            <a href="https://youtube.com" class="app-card" tabindex="0">
+                <img src="youtube.png" alt="YouTube">
+                <span class="app-name">YouTube</span>
+            </a>
+            <a href="https://netflix.com" class="app-card" tabindex="0">
+                <img src="netflix.png" alt="Netflix">
+                <span class="app-name">Netflix</span>
+            </a>
+            <a href="https://twitch.tv" class="app-card" tabindex="0">
+                <img src="twitch.png" alt="Twitch">
+                <span class="app-name">Twitch</span>
+            </a>
+            <a href="https://google.com" class="app-card" tabindex="0">
+                <img src="browser.png" alt="Browser">
+                <span class="app-name">Browser</span>
+            </a>
+        </div>
+        <div class="close-hint">PRESS BACK / ESC TO CLOSE</div>
+    </div>
+
+    <script>
+        // Clock, Day, and Date Updates
+        function updateWidget() {
+            const now = new Date();
+            
+            const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+            document.getElementById('dayName').textContent = days[now.getDay()];
+
+            const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+            const dayNum = now.getDate();
+            const monthName = months[now.getMonth()];
+            const year = now.getFullYear();
+            document.getElementById('fullDate').textContent = `${dayNum} ${monthName}, ${year}.`;
+
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            hours = hours < 10 ? '0' + hours : hours;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            document.getElementById('clock').textContent = `- ${hours}:${minutes} -`;
+        }
+        
+        setInterval(updateWidget, 1000);
+        updateWidget();
+
+        // Modal Controls & D-Pad Remote Navigation
+        const appsBtn = document.getElementById('appsBtn');
+        const appsModal = document.getElementById('appsModal');
+        const appCards = document.querySelectorAll('.app-card');
+
+        function openModal() {
+            appsModal.classList.add('active');
+            appCards[0].focus();
+        }
+
+        function closeModal() {
+            appsModal.classList.remove('active');
+            appsBtn.focus();
+        }
+
+        appsBtn.addEventListener('click', openModal);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' || e.key === 'Backspace' || e.keyCode === 10009 || e.keyCode === 461) {
+                if (appsModal.classList.contains('active')) {
+                    closeModal();
+                }
+            }
+
+            if (appsModal.classList.contains('active')) {
+                const focused = document.activeElement;
+                const index = Array.from(appCards).indexOf(focused);
+
+                if (index !== -1) {
+                    if (e.key === 'ArrowRight' && index < appCards.length - 1) {
+                        appCards[index + 1].focus();
+                    } else if (e.key === 'ArrowLeft' && index > 0) {
+                        appCards[index - 1].focus();
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
