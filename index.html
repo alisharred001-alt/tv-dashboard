@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TV Dashboard</title>
-    <!-- Fonts matching the stylized futuristic aesthetic -->
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -23,7 +22,7 @@
             font-family: 'Rajdhani', sans-serif;
         }
 
-        /* Video Background */
+        /* Background Container (Loads image fallback first, then video over it) */
         .video-container {
             position: fixed;
             top: 0;
@@ -32,6 +31,8 @@
             height: 100%;
             z-index: 1;
             overflow: hidden;
+            background: url('wallpaper.jpg') no-repeat center center fixed;
+            background-size: cover;
         }
 
         .video-container video {
@@ -41,7 +42,6 @@
             filter: brightness(0.7) contrast(1.1);
         }
 
-        /* Ambient Dark/Blue Glow Overlay */
         .ambient-overlay {
             position: fixed;
             top: 0;
@@ -66,7 +66,6 @@
             padding: 2rem 4rem;
         }
 
-        /* Center Widget Group */
         .center-group {
             display: flex;
             flex-direction: column;
@@ -122,7 +121,6 @@
             margin-top: 0.1rem;
         }
 
-        /* Navigation Button */
         .nav-container {
             margin-top: 2.5rem;
         }
@@ -151,7 +149,7 @@
             background: rgba(14, 165, 233, 0.3);
             border-color: #38bdf8;
             transform: scale(1.08);
-            box-shadow: 0 0 30px rgba(56, 189, 248, 0.6), inset 0 0 15px rgba(56, 189, 248, 0.3);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.6);
         }
 
         .nav-btn svg {
@@ -160,7 +158,6 @@
             fill: #38bdf8;
         }
 
-        /* Apps Modal Overlay */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -195,7 +192,6 @@
             text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
         }
 
-        /* App Grid */
         .app-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -228,7 +224,6 @@
             box-shadow: 0 0 30px rgba(56, 189, 248, 0.5);
         }
 
-        /* Rounded Icon Images */
         .app-card img {
             width: 50px;
             height: 50px;
@@ -255,17 +250,14 @@
 </head>
 <body>
 
-    <!-- Video Background (Optimized for TV Browsers) -->
     <div class="video-container">
-        <video autoplay loop muted playsinline webkit-playsinline id="bgVideo" preload="auto">
+        <video autoplay loop muted playsinline webkit-playsinline id="bgVideo">
             <source src="Blue-Flames-Samurai-4K.mp4" type="video/mp4">
         </video>
     </div>
 
-    <!-- Ambient Overlay -->
     <div class="ambient-overlay"></div>
 
-    <!-- UI Layer -->
     <div class="ui-layer">
         <div class="center-group">
             <div class="welcome-tag">Welcome Back</div>
@@ -276,13 +268,12 @@
 
         <div class="nav-container">
             <button class="nav-btn active" id="appsBtn" tabindex="0">
-                <svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4h-4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
+                <svg viewBox="0 0 24 24"><path d="M4 8h4V4H4v4zm6 12h4v-4h-4v4zm-6 0h4v-4H4v4zm0-6h4v-4H4v4zm6 0h4v-4h-4v4zm6-10v4h4V4h-4zm-6 4h4V4H4v4zm6 6h4v-4h-4v4zm0 6h4v-4h-4v4z"/></svg>
                 APPS
             </button>
         </div>
     </div>
 
-    <!-- Apps Modal Overlay -->
     <div class="modal-overlay" id="appsModal">
         <div class="modal-title">Applications</div>
         <div class="app-grid">
@@ -307,30 +298,22 @@
     </div>
 
     <script>
-        // Clock, Day, and Date Updates
         function updateWidget() {
             const now = new Date();
-            
             const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
             document.getElementById('dayName').textContent = days[now.getDay()];
 
             const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
-            const dayNum = now.getDate();
-            const monthName = months[now.getMonth()];
-            const year = now.getFullYear();
-            document.getElementById('fullDate').textContent = `${dayNum} ${monthName}, ${year}.`;
+            document.getElementById('fullDate').textContent = `${now.getDate()} ${months[now.getMonth()]}, ${now.getFullYear()}.`;
 
-            let hours = now.getHours();
-            let minutes = now.getMinutes();
-            hours = hours < 10 ? '0' + hours : hours;
-            minutes = minutes < 10 ? '0' + minutes : minutes;
+            let hours = String(now.getHours()).padStart(2, '0');
+            let minutes = String(now.getMinutes()).padStart(2, '0');
             document.getElementById('clock').textContent = `- ${hours}:${minutes} -`;
         }
         
         setInterval(updateWidget, 1000);
         updateWidget();
 
-        // Modal Controls & D-Pad Remote Navigation
         const appsBtn = document.getElementById('appsBtn');
         const appsModal = document.getElementById('appsModal');
         const appCards = document.querySelectorAll('.app-card');
