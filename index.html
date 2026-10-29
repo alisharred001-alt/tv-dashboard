@@ -22,7 +22,7 @@
             font-family: 'Rajdhani', sans-serif;
         }
 
-        /* Background Container (Loads image fallback first, then video over it) */
+        /* Video Container with Image Fallback */
         .video-container {
             position: fixed;
             top: 0;
@@ -31,7 +31,7 @@
             height: 100%;
             z-index: 1;
             overflow: hidden;
-            background: url('wallpaper.jpg') no-repeat center center fixed;
+            background: #050508 url('wallpaper.jpg') no-repeat center center fixed;
             background-size: cover;
         }
 
@@ -251,7 +251,7 @@
 <body>
 
     <div class="video-container">
-        <video autoplay loop muted playsinline webkit-playsinline id="bgVideo">
+        <video autoplay loop muted playsinline webkit-playsinline id="bgVideo" preload="auto">
             <source src="Blue-Flames-Samurai-4K.mp4" type="video/mp4">
         </video>
     </div>
@@ -349,6 +349,15 @@
                     }
                 }
             }
+        });
+
+        // Hide video element automatically if TV browser fails to play it
+        const video = document.getElementById('bgVideo');
+        video.addEventListener('error', function() {
+            video.style.display = 'none';
+        });
+        video.play().catch(function() {
+            video.style.display = 'none';
         });
     </script>
 </body>
